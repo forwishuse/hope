@@ -27,10 +27,11 @@
   --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   color-scheme:dark;
 }
+*,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--sky);color:var(--ink);font-family:var(--sans);overflow:hidden}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-.stage{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;
+.stage{position:relative;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   padding-block:clamp(24px,6vh,56px);pointer-events:none}
 .stage>*{pointer-events:auto}
@@ -74,7 +75,7 @@ button.again{background:transparent;border:1px solid var(--gold);color:var(--gol
 
 <style>
 *{-webkit-tap-highlight-color:transparent}
-html{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;background:#070a18}
+html{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:#070a18}
 body{margin:0;font-size:14px;overscroll-behavior:none}
 </style>
 </head>
@@ -88,13 +89,13 @@ body{margin:0;font-size:14px;overscroll-behavior:none}
 
   <form class="panel" id="panel" autocomplete="off">
     <label class="cap" for="wish">我的願望</label>
-    <textarea id="wish" maxlength="80" placeholder="例如：希望家人平安健康，明年一起去看極光">希望家人平安健康，明年一起去看極光</textarea>
+    <textarea id="wish" maxlength="80" placeholder="寫下你想對宇宙說的願望…"></textarea>
     <div class="row">
       <div class="mode" role="radiogroup" aria-label="發送方式">
         <input type="radio" name="mode" id="m-rocket" value="rocket" checked><label for="m-rocket">🚀 火箭</label>
         <input type="radio" name="mode" id="m-wave" value="wave"><label for="m-wave">📡 電波</label>
       </div>
-      <button class="go" type="submit" id="go">發射</button>
+      <button class="go" type="submit" id="go" disabled>發射</button>
     </div>
     <p class="count" id="count"></p>
   </form>

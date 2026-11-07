@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070a18">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="向宇宙發願">
+<meta name="description" content="寫下願望，用火箭或電波把它送進星空。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070a18'/%3E%3Cpath d='M32 10l5 15h16l-13 9 5 16-13-10-13 10 5-16-13-9h16z' fill='%23f1c66b'/%3E%3C/svg%3E">
+<title>向宇宙發願</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed starfield canvas; a single quiet panel anchored low, sky kept open above for the launch */
+:root{
+  --sky:#070a18;
+  --sky-2:#10162e;
+  --ink:#e9e6dc;
+  --dim:#8e93ad;
+  --gold:#f1c66b;
+  --gold-soft:rgba(241,198,107,.16);
+  --line:rgba(233,230,220,.14);
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--sky);color:var(--ink);font-family:var(--sans);overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+.stage{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:clamp(24px,6vh,56px);pointer-events:none}
+.stage>*{pointer-events:auto}
+header{text-align:center;transition:opacity .6s}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,6vw,48px);letter-spacing:.18em;margin:0;text-wrap:balance}
+.sub{color:var(--dim);margin:.6em 0 0;font-size:14px;letter-spacing:.06em}
+.panel{width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px;transition:opacity .5s,transform .5s}
+.panel.away{opacity:0;transform:translateY(16px);pointer-events:none}
+label.cap{font-size:12px;letter-spacing:.2em;color:var(--dim)}
+textarea{width:100%;box-sizing:border-box;resize:none;min-height:96px;padding:14px 16px;border-radius:14px;
+  background:rgba(16,22,46,.72);border:1px solid var(--line);color:var(--ink);font:500 17px/1.6 var(--serif);
+  backdrop-filter:blur(6px)}
+textarea::placeholder{color:var(--dim)}
+textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.mode{display:flex;flex:1 1 220px;border:1px solid var(--line);border-radius:999px;padding:4px;background:rgba(16,22,46,.6)}
+.mode input{position:absolute;opacity:0;pointer-events:none}
+.mode label{flex:1;text-align:center;padding:9px 10px;border-radius:999px;cursor:pointer;color:var(--dim);font-size:14px;transition:background .2s,color .2s}
+.mode input:checked+label{background:var(--gold-soft);color:var(--gold)}
+.mode input:focus-visible+label{outline:2px solid var(--gold);outline-offset:1px}
+button.go{flex:0 0 auto;padding:12px 26px;border:none;border-radius:999px;background:var(--gold);color:#1a1405;
+  font:700 16px var(--sans);letter-spacing:.2em;cursor:pointer;transition:transform .15s,filter .15s}
+button.go:hover{filter:brightness(1.08)}
+button.go:active{transform:scale(.97)}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+button.go:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:12px;color:var(--dim);margin:0}
+.result{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%);width:min(440px,calc(100% - 32px));
+  text-align:center;opacity:0;transition:opacity .7s,transform .7s;pointer-events:none}
+.result.show{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+.result h2{font-family:var(--serif);font-size:26px;letter-spacing:.14em;margin:0 0 6px}
+.result .wish{font-family:var(--serif);font-size:18px;line-height:1.7;margin:14px 0 20px;color:var(--gold);word-break:break-word}
+.log{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;text-align:left;font-size:13px;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 4px;margin-bottom:22px}
+.log dt{color:var(--dim);letter-spacing:.1em}
+.log dd{margin:0;font-variant-numeric:tabular-nums}
+button.again{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 24px;border-radius:999px;font:500 15px var(--sans);letter-spacing:.15em;cursor:pointer}
+.count{text-align:center;color:var(--dim);font-size:12px;letter-spacing:.12em;margin:0}
+@media (prefers-reduced-motion:reduce){.panel,.result,header{transition:none}}
+</style>
+
+<style>
+*{-webkit-tap-highlight-color:transparent}
+html{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;background:#070a18}
+body{margin:0;font-size:14px;overscroll-behavior:none}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<div class="stage">
+  <header id="hd">
+    <h1>向宇宙發願</h1>
+    <p class="sub">寫下願望，把它送進星空</p>
+  </header>
+
+  <form class="panel" id="panel" autocomplete="off">
+    <label class="cap" for="wish">我的願望</label>
+    <textarea id="wish" maxlength="80" placeholder="例如：希望家人平安健康，明年一起去看極光">希望家人平安健康，明年一起去看極光</textarea>
+    <div class="row">
+      <div class="mode" role="radiogroup" aria-label="發送方式">
+        <input type="radio" name="mode" id="m-rocket" value="rocket" checked><label for="m-rocket">🚀 火箭</label>
+        <input type="radio" name="mode" id="m-wave" value="wave"><label for="m-wave">📡 電波</label>
+      </div>
+      <button class="go" type="submit" id="go">發射</button>
+    </div>
+    <p class="count" id="count"></p>
+  </form>
+</div>
+
+<section class="result" id="result" aria-live="polite">
+  <h2 id="r-title">願望已送出</h2>
+  <p class="wish" id="r-wish"></p>
+  <dl class="log">
+    <dt>目標</dt><dd id="r-star"></dd>
+    <dt>距離</dt><dd id="r-dist"></dd>
+    <dt>抵達</dt><dd id="r-eta"></dd>
+  </dl>
+  <button class="again" id="again" type="button">再許一個願</button>
+</section>
+
+<script>
+(()=>{
+const cv=document.getElementById('sky'),ctx=cv.getContext('2d');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,DPR,stars=[],parts=[],rings=[],glyphs=[],flash=null;
+let launch=null; // active launch state
+
+const TARGETS=[
+  {name:'織女星',en:'Vega',ly:25},
+  {name:'天狼星',en:'Sirius',ly:8.6},
+  {name:'大角星',en:'Arcturus',ly:37},
+  {name:'北極星',en:'Polaris',ly:433},
+  {name:'昴宿星團',en:'Pleiades',ly:444},
+  {name:'參宿四',en:'Betelgeuse',ly:548},
+  {name:'南門二',en:'α Centauri',ly:4.37},
+  {name:'天津四',en:'Deneb',ly:2600},
+];
+const VOYAGER=17600; // 航海家一號約 17 km/s，約為光速的 1/17,600
+
+function resize(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;
+  cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);
+  const n=Math.round(W*H/2600);
+  stars=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,
+    p:Math.random()*6.28,s:Math.random()*.02+.005,warm:Math.random()<.18}));
+}
+addEventListener('resize',resize);resize();
+
+function drawSky(t){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#04060f');g.addColorStop(.7,'#0a0f24');g.addColorStop(1,'#141b3a');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // faint band of the milky way
+  const mw=ctx.createLinearGradient(0,H*.1,W,H*.6);
+  mw.addColorStop(0,'rgba(120,130,190,0)');mw.addColorStop(.5,'rgba(120,130,190,.07)');mw.addColorStop(1,'rgba(120,130,190,0)');
+  ctx.fillStyle=mw;ctx.fillRect(0,0,W,H);
+  for(const s of stars){
+    const a=reduce?.7:.45+.55*Math.sin(t*s.s+s.p);
+    ctx.fillStyle=s.warm?`rgba(255,220,170,${a})`:`rgba(220,228,255,${a})`;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();
+  }
+  // horizon glow
+  const hz=ctx.createRadialGradient(W/2,H*1.15,0,W/2,H*1.15,H*.7);
+  hz.addColorStop(0,'rgba(241,198,107,.10)');hz.addColorStop(1,'rgba(241,198,107,0)');
+  ctx.fillStyle=hz;ctx.fillRect(0,0,W,H);
+}
+
+function drawRocket(x,y,sc,ang){
+  ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.scale(sc,sc);
+  // flame
+  const fl=14+Math.random()*10;
+  const fg=ctx.createLinearGradient(0,18,0,18+fl);
+  fg.addColorStop(0,'rgba(255,240,200,1)');fg.addColorStop(.4,'rgba(241,170,70,.9)');fg.addColorStop(1,'rgba(230,90,40,0)');
+  ctx.fillStyle=fg;ctx.beginPath();ctx.moveTo(-6,18);ctx.quadraticCurveTo(0,18+fl*1.6,6,18);ctx.closePath();ctx.fill();
+  // fins
+  ctx.fillStyle='#c9493a';
+  ctx.beginPath();ctx.moveTo(-8,8);ctx.lineTo(-15,20);ctx.lineTo(-8,18);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(8,8);ctx.lineTo(15,20);ctx.lineTo(8,18);ctx.closePath();ctx.fill();
+  // body
+  ctx.fillStyle='#ece8dd';
+  ctx.beginPath();ctx.moveTo(0,-26);ctx.bezierCurveTo(10,-14,9,6,8,18);ctx.lineTo(-8,18);ctx.bezierCurveTo(-9,6,-10,-14,0,-26);ctx.fill();
+  ctx.fillStyle='#c9493a';
+  ctx.beginPath();ctx.moveTo(0,-26);ctx.bezierCurveTo(5,-20,7,-15,7.5,-12);ctx.lineTo(-7.5,-12);ctx.bezierCurveTo(-7,-15,-5,-20,0,-26);ctx.fill();
+  // window
+  ctx.fillStyle='#1c2650';ctx.beginPath();ctx.arc(0,-2,4,0,6.283);ctx.fill();
+  ctx.strokeStyle='#f1c66b';ctx.lineWidth=1.4;ctx.stroke();
+  ctx.restore();
+}
+
+function drawDish(x,y,a){
+  ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);
+  ctx.strokeStyle='#d8d4c8';ctx.fillStyle='#d8d4c8';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-10,0);ctx.lineTo(0,-14);ctx.lineTo(10,0);ctx.stroke();
+  ctx.save();ctx.translate(0,-18);ctx.rotate(-.25);
+  ctx.beginPath();ctx.ellipse(0,0,22,8,0,Math.PI,0);ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,-2);ctx.lineTo(0,-16);ctx.stroke();
+  ctx.fillStyle='#f1c66b';ctx.beginPath();ctx.arc(0,-17,2.5,0,6.283);ctx.fill();
+  ctx.restore();ctx.restore();
+}
+
+// split wish into glyph particles
+function makeGlyphs(text,x,y){
+  const chars=[...text].slice(0,40);
+  const size=Math.min(22,W/(Math.min(chars.length,16)+2));
+  const perLine=Math.max(1,Math.floor((W*.8)/size));
+  return chars.map((c,i)=>{
+    const line=Math.floor(i/perLine),col=i%perLine,lineLen=Math.min(perLine,chars.length-line*perLine);
+    return {c,x:x+(col-(lineLen-1)/2)*size,y:y+line*size*1.3,size,vy:0,vx:0,a:1,d:Math.random()*400+i*30};
+  });
+}
+
+function startLaunch(text,mode){
+  const target=TARGETS[Math.floor(Math.random()*TARGETS.length)];
+  const tx=W*(.25+Math.random()*.5),ty=H*(.08+Math.random()*.14);
+  launch={mode,text,target,t0:performance.now(),tx,ty,done:false,
+    rx:W/2,ry:H*.78,vx:0,vy:0};
+  parts=[];rings=[];flash=null;
+  glyphs=makeGlyphs(text,W/2,H*.62);
+  if(reduce){ setTimeout(()=>finish(),300); return; }
+}
+
+function finish(){
+  if(!launch||launch.done)return;
+  launch.done=true;
+  flash={x:launch.tx,y:launch.ty,t0:performance.now()};
+  // leave a new star where the wish landed
+  stars.push({x:launch.tx,y:launch.ty,r:1.9,p:0,s:.03,warm:true});
+  setTimeout(()=>showResult(launch),reduce?0:900);
+}
+
+function step(now){
+  const t=now;
+  drawSky(t/16);
+  if(launch&&!launch.done&&!reduce){
+    const el=now-launch.t0;
+    if(launch.mode==='rocket'){
+      // rocket rises from the bottom, curving toward the target star
+      if(el>500){
+        const dx=launch.tx-launch.rx,dy=launch.ty-launch.ry,dist=Math.hypot(dx,dy);
+        const acc=.05+Math.min(el-500,2000)/2000*.25;
+        launch.vx+=dx/dist*acc;launch.vy+=dy/dist*acc;
+        launch.vx*=.985;launch.vy*=.985;
+        launch.rx+=launch.vx;launch.ry+=launch.vy;
+        for(let i=0;i<3;i++)parts.push({x:launch.rx-launch.vx*2+(Math.random()-.5)*4,y:launch.ry-launch.vy*2+(Math.random()-.5)*4,
+          vx:-launch.vx*.15+(Math.random()-.5)*.6,vy:-launch.vy*.15+(Math.random()-.5)*.6,life:1,r:Math.random()*3+1.5});
+        if(dist<12)finish();
+      }
+      const progress=Math.max(0,Math.min(1,(H*.78-launch.ry)/(H*.78-launch.ty)));
+      const sc=1.25-progress*1.05;
+      const ang=Math.atan2(launch.vy,launch.vx)+Math.PI/2;
+      // glyphs follow the rocket
+      for(const g of glyphs){
+        if(el>500+g.d*.5){
+          g.vx+=(launch.rx-g.x)*.002;g.vy+=(launch.ry-g.y)*.002;g.vx*=.94;g.vy*=.94;
+          g.x+=g.vx;g.y+=g.vy;g.a=Math.max(0,g.a-.006);
+        }
+      }
+      drawParts();drawGlyphs();
+      drawRocket(launch.rx,launch.ry,Math.max(.15,sc),el>500?ang:0);
+    }else{
+      // radio dish emits rings toward the target; glyphs drift up in a stream
+      const sx=W/2,sy=H*.82;
+      drawDish(sx,sy+20,Math.min(1,el/300));
+      if(el>400&&el<3000&&(rings.length===0||now-rings[rings.length-1].t0>260))rings.push({t0:now});
+      const ang=Math.atan2(launch.ty-sy,launch.tx-sx);
+      const maxR=Math.hypot(launch.tx-sx,launch.ty-sy);
+      ctx.lineCap='round';
+      for(const r of rings){
+        const k=(now-r.t0)/1600;if(k>1)continue;
+        const rad=k*maxR;
+        ctx.strokeStyle=`rgba(241,198,107,${(1-k)*.85})`;ctx.lineWidth=2.2*(1-k)+.6;
+        ctx.beginPath();ctx.arc(sx,sy,rad,ang-.32,ang+.32);ctx.stroke();
+      }
+      for(const g of glyphs){
+        if(el>500+g.d){
+          const dx=launch.tx-g.x,dy=launch.ty-g.y,d=Math.hypot(dx,dy)||1;
+          g.vx+=dx/d*.12;g.vy+=dy/d*.12;g.vx*=.97;g.vy*=.97;
+          g.x+=g.vx;g.y+=g.vy;g.size*=.996;
+          if(d<20)g.a=Math.max(0,g.a-.08);
+        }
+      }
+      drawGlyphs();
+      if(el>3600)finish();
+    }
+  }else if(launch&&launch.done){
+    drawParts();
+  }
+  if(flash){
+    const k=(now-flash.t0)/1100;
+    if(k<1){
+      const rr=6+k*60;
+      const fg=ctx.createRadialGradient(flash.x,flash.y,0,flash.x,flash.y,rr);
+      fg.addColorStop(0,`rgba(255,240,200,${1-k})`);fg.addColorStop(1,'rgba(241,198,107,0)');
+      ctx.fillStyle=fg;ctx.beginPath();ctx.arc(flash.x,flash.y,rr,0,6.283);ctx.fill();
+      ctx.strokeStyle=`rgba(255,235,190,${(1-k)*.8})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(flash.x-rr*1.4,flash.y);ctx.lineTo(flash.x+rr*1.4,flash.y);
+      ctx.moveTo(flash.x,flash.y-rr*1.4);ctx.lineTo(flash.x,flash.y+rr*1.4);ctx.stroke();
+    }
+  }
+  requestAnimationFrame(step);
+}
+function drawParts(){
+  for(const p of parts){
+    p.x+=p.vx;p.y+=p.vy;p.life-=.02;
+    if(p.life<=0)continue;
+    ctx.fillStyle=`rgba(${230+25*p.life|0},${150+80*p.life|0},90,${p.life*.7})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,6.283);ctx.fill();
+  }
+  parts=parts.filter(p=>p.life>0);
+}
+function drawGlyphs(){
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(const g of glyphs){
+    if(g.a<=0)continue;
+    ctx.font=`500 ${g.size}px "Noto Serif TC","Songti TC",serif`;
+    ctx.fillStyle=`rgba(241,198,107,${g.a})`;
+    ctx.shadowColor='rgba(241,198,107,.6)';ctx.shadowBlur=8;
+    ctx.fillText(g.c,g.x,g.y);
+  }
+  ctx.shadowBlur=0;
+}
+requestAnimationFrame(step);
+
+// UI
+const panel=document.getElementById('panel'),hd=document.getElementById('hd'),ta=document.getElementById('wish'),
+  go=document.getElementById('go'),res=document.getElementById('result'),cnt=document.getElementById('count');
+let count=0;
+try{count=+localStorage.getItem('wish-count')||0}catch(e){}
+const showCount=()=>{cnt.textContent=count?`你已向宇宙送出 ${count} 個願望`:''};
+showCount();
+ta.addEventListener('input',()=>{go.disabled=!ta.value.trim()});
+
+panel.addEventListener('submit',e=>{
+  e.preventDefault();
+  const text=ta.value.trim();if(!text)return;
+  const mode=document.querySelector('input[name="mode"]:checked').value;
+  panel.classList.add('away');hd.style.opacity='.25';
+  startLaunch(text,mode);
+});
+
+function showResult(L){
+  const year=new Date().getFullYear();
+  const t=L.target;
+  document.getElementById('r-wish').textContent='「'+L.text+'」';
+  document.getElementById('r-star').textContent=`${t.name}（${t.en}）`;
+  document.getElementById('r-dist').textContent=`${t.ly.toLocaleString('zh-TW')} 光年`;
+  if(L.mode==='wave'){
+    document.getElementById('r-title').textContent='電波已發送';
+    const y=Math.round(year+t.ly);
+    document.getElementById('r-eta').textContent=`以光速前進，約西元 ${y.toLocaleString('zh-TW')} 年抵達`;
+  }else{
+    document.getElementById('r-title').textContent='火箭已升空';
+    const yrs=Math.round(t.ly*VOYAGER);
+    document.getElementById('r-eta').textContent=`以航海家一號的速度，約需 ${yrs.toLocaleString('zh-TW')} 年`;
+  }
+  res.classList.add('show');
+  count++;try{localStorage.setItem('wish-count',count)}catch(e){}
+  showCount();
+  document.getElementById('again').focus({preventScroll:true});
+}
+document.getElementById('again').addEventListener('click',()=>{
+  res.classList.remove('show');panel.classList.remove('away');hd.style.opacity='';
+  launch=null;glyphs=[];rings=[];
+  ta.value='';go.disabled=true;ta.focus();
+});
+})();
+</script>
+</body>
+</html>

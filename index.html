@@ -287,6 +287,9 @@ function step(now){
       const fg=ctx.createRadialGradient(flash.x,flash.y,0,flash.x,flash.y,rr);
       fg.addColorStop(0,`rgba(255,240,200,${1-k})`);fg.addColorStop(1,'rgba(241,198,107,0)');
       ctx.fillStyle=fg;ctx.beginPath();ctx.arc(flash.x,flash.y,rr,0,6.283);ctx.fill();
+      for(let i=0;i<16;i++){const a=i/16*6.283+.2,r1=rr*.6,r2=rr*(1.6+k*3);
+        ctx.strokeStyle=`rgba(255,225,160,${(1-k)*.5})`;ctx.lineWidth=1.2;
+        ctx.beginPath();ctx.moveTo(flash.x+Math.cos(a)*r1,flash.y+Math.sin(a)*r1);ctx.lineTo(flash.x+Math.cos(a)*r2,flash.y+Math.sin(a)*r2);ctx.stroke();}
       ctx.strokeStyle=`rgba(255,235,190,${(1-k)*.8})`;ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(flash.x-rr*1.4,flash.y);ctx.lineTo(flash.x+rr*1.4,flash.y);
       ctx.moveTo(flash.x,flash.y-rr*1.4);ctx.lineTo(flash.x,flash.y+rr*1.4);ctx.stroke();
@@ -339,15 +342,10 @@ function showResult(L){
   document.getElementById('r-wish').textContent='「'+L.text+'」';
   document.getElementById('r-star').textContent=`${t.name}（${t.en}）`;
   document.getElementById('r-dist').textContent=`${t.ly.toLocaleString('zh-TW')} 光年`;
-  if(L.mode==='wave'){
-    document.getElementById('r-title').textContent='電波已發送';
-    const y=Math.round(year+t.ly);
-    document.getElementById('r-eta').textContent=`以光速前進，約西元 ${y.toLocaleString('zh-TW')} 年抵達`;
-  }else{
-    document.getElementById('r-title').textContent='火箭已升空';
-    const yrs=Math.round(t.ly*VOYAGER);
-    document.getElementById('r-eta').textContent=`以航海家一號的速度，約需 ${yrs.toLocaleString('zh-TW')} 年`;
-  }
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  const stamp=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('r-title').textContent=L.mode==='wave'?'超光速電波已送達':'曲速火箭已抵達';
+  document.getElementById('r-eta').textContent=`${stamp}　超光速躍遷，瞬間抵達`;
   res.classList.add('show');
   count++;try{localStorage.setItem('wish-count',count)}catch(e){}
   showCount();

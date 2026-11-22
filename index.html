@@ -72,6 +72,34 @@ button.go:disabled{opacity:.4;cursor:not-allowed}
 .log dd{margin:0;font-variant-numeric:tabular-nums}
 button.again{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:10px 24px;border-radius:999px;font:500 15px var(--sans);letter-spacing:.15em;cursor:pointer}
 .count{text-align:center;color:var(--dim);font-size:12px;letter-spacing:.12em;margin:0}
+.histbtn{align-self:center;display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--line);
+  color:var(--ink);padding:8px 18px;border-radius:999px;font:500 13px var(--sans);letter-spacing:.12em;cursor:pointer}
+.histbtn:hover{border-color:var(--gold);color:var(--gold)}
+.histbtn .n{color:var(--gold);font-variant-numeric:tabular-nums}
+.scrim{position:fixed;inset:0;background:rgba(3,5,12,.6);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;margin:0 auto;max-width:560px;max-height:78%;display:flex;flex-direction:column;
+  background:#0d1330;border:1px solid var(--line);border-bottom:none;border-radius:20px 20px 0 0;
+  transform:translateY(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.show{transform:none}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px max(18px,env(safe-area-inset-left,0px)) 12px max(18px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.sheet-hd h3{margin:0;font-family:var(--serif);font-size:19px;letter-spacing:.14em}
+.sheet-hd small{display:block;color:var(--dim);font-size:12px;letter-spacing:.06em;margin-top:2px}
+.xbtn{background:transparent;border:none;color:var(--dim);font-size:24px;line-height:1;cursor:pointer;padding:4px 8px}
+.hlist{list-style:none;margin:0;padding:8px 0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hitem{display:flex;flex-direction:column;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.hitem:last-child{border-bottom:none}
+.htext{font-family:var(--serif);font-size:16px;line-height:1.6;word-break:break-word;margin:0}
+.hmeta{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums}
+.hmeta .times{color:var(--gold)}
+.hact{display:flex;gap:8px}
+.hact button{border-radius:999px;padding:8px 16px;font:500 13px var(--sans);letter-spacing:.1em;cursor:pointer}
+.re{background:var(--gold);color:#1a1405;border:none;font-weight:700!important}
+.del{background:transparent;color:var(--dim);border:1px solid var(--line)}
+.del.armed{color:#ff8a7a;border-color:#ff8a7a}
+.hempty{padding:40px 24px;text-align:center;color:var(--dim);line-height:1.8}
+@media (prefers-reduced-motion:reduce){.sheet,.scrim{transition:none}}
 @media (prefers-reduced-motion:reduce){.panel,.result,header{transition:none}}
 </style>
 
@@ -100,8 +128,18 @@ body{margin:0;font-size:14px;overscroll-behavior:none}
       <button class="go" type="submit" id="go" disabled>發射</button>
     </div>
     <p class="count" id="count"></p>
+    <button class="histbtn" type="button" id="openHist">歷史願望 <span class="n" id="histN">0</span></button>
   </form>
 </div>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="histTitle" aria-hidden="true">
+  <div class="sheet-hd">
+    <div><h3 id="histTitle">歷史願望</h3><small>點「再許一次」立刻重新發射</small></div>
+    <button class="xbtn" type="button" id="closeHist" aria-label="關閉">×</button>
+  </div>
+  <ul class="hlist" id="hlist"></ul>
+</section>
 
 <section class="result" id="result" aria-live="polite">
   <h2 id="r-title">願望已送出</h2>
@@ -351,8 +389,51 @@ function showResult(L){
   res.classList.add('show');
   count++;try{localStorage.setItem('wish-count',count)}catch(e){}
   showCount();
+  addHist(L);
   document.getElementById('again').focus({preventScroll:true});
 }
+// ---- 歷史願望 ----
+const HKEY='wish-history';
+let hist=[];
+try{hist=JSON.parse(localStorage.getItem(HKEY)||'[]');if(!Array.isArray(hist))hist=[]}catch(e){hist=[]}
+const saveHist=()=>{try{localStorage.setItem(HKEY,JSON.stringify(hist))}catch(e){}};
+const fmt=ts=>{const d=new Date(ts),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`};
+const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim'),hlist=document.getElementById('hlist'),histN=document.getElementById('histN');
+function addHist(L){
+  const now=Date.now();
+  let h=hist.find(x=>x.text===L.text);
+  if(h){h.times++;h.last=now;h.mode=L.mode;h.star=L.target.name;hist=hist.filter(x=>x!==h);hist.unshift(h)}
+  else hist.unshift({id:now.toString(36)+Math.random().toString(36).slice(2,6),text:L.text,mode:L.mode,star:L.target.name,first:now,last:now,times:1});
+  saveHist();renderHist();
+}
+function renderHist(){
+  histN.textContent=hist.length;
+  hlist.replaceChildren();
+  if(!hist.length){const li=document.createElement('li');li.className='hempty';li.innerHTML='還沒有許過願望。<br>寫下第一個願望，發射後就會出現在這裡。';hlist.append(li);return}
+  for(const h of hist){
+    const li=document.createElement('li');li.className='hitem';
+    const p=document.createElement('p');p.className='htext';p.textContent=h.text;
+    const m=document.createElement('div');m.className='hmeta';
+    m.innerHTML=`<span>${h.mode==='wave'?'📡 電波':'🚀 火箭'}</span><span>最近：${fmt(h.last)}</span><span>送往${h.star}</span><span class="times">已許 ${h.times} 次</span>`;
+    const a=document.createElement('div');a.className='hact';
+    const re=document.createElement('button');re.type='button';re.className='re';re.textContent='再許一次';
+    re.onclick=()=>{ta.value=h.text;document.getElementById(h.mode==='wave'?'m-wave':'m-rocket').checked=true;go.disabled=false;closeHist();setTimeout(()=>panel.requestSubmit(),250)};
+    const del=document.createElement('button');del.type='button';del.className='del';del.textContent='刪除';
+    let tm;del.onclick=()=>{
+      if(!del.classList.contains('armed')){del.classList.add('armed');del.textContent='確定刪除？';tm=setTimeout(()=>{del.classList.remove('armed');del.textContent='刪除'},3000);return}
+      clearTimeout(tm);hist=hist.filter(x=>x.id!==h.id);saveHist();renderHist();
+    };
+    a.append(re,del);li.append(p,m,a);hlist.append(li);
+  }
+}
+function openHist(){renderHist();sheet.classList.add('show');scrim.classList.add('show');sheet.setAttribute('aria-hidden','false');document.getElementById('closeHist').focus({preventScroll:true})}
+function closeHist(){sheet.classList.remove('show');scrim.classList.remove('show');sheet.setAttribute('aria-hidden','true')}
+document.getElementById('openHist').addEventListener('click',openHist);
+document.getElementById('closeHist').addEventListener('click',closeHist);
+scrim.addEventListener('click',closeHist);
+addEventListener('keydown',e=>{if(e.key==='Escape')closeHist()});
+renderHist();
+
 document.getElementById('again').addEventListener('click',()=>{
   res.classList.remove('show');panel.classList.remove('away');hd.style.opacity='';
   launch=null;glyphs=[];rings=[];

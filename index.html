@@ -30,6 +30,7 @@
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{background:var(--sky);color:var(--ink);font-family:var(--sans);overflow:hidden}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
@@ -100,6 +101,50 @@ button.again{background:transparent;border:1px solid var(--gold);color:var(--gol
 .del.armed{color:#ff8a7a;border-color:#ff8a7a}
 .hempty{padding:40px 24px;text-align:center;color:var(--dim);line-height:1.8}
 @media (prefers-reduced-motion:reduce){.sheet,.scrim{transition:none}}
+.kind{display:flex;gap:4px;align-self:center;border:1px solid var(--line);border-radius:999px;padding:4px;background:rgba(16,22,46,.6)}
+.kind button{background:none;border:none;color:var(--dim);padding:8px 24px;border-radius:999px;font:500 14px var(--sans);letter-spacing:.24em;cursor:pointer;transition:background .2s,color .2s}
+.kind button[aria-selected="true"]{background:var(--gold-soft);color:var(--gold)}
+.catrow{display:flex;align-items:center;gap:10px}
+.catrow label{font-size:12px;letter-spacing:.2em;color:var(--dim);flex:0 0 auto}
+.catrow select{flex:1;min-width:0;background:rgba(16,22,46,.72);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:500 14px var(--sans)}
+.catrow select:focus{outline:none;border-color:var(--gold)}
+.oracle{position:fixed;inset:0;z-index:15;overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(4,6,15,.62);
+  padding-top:max(24px,env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  opacity:0;pointer-events:none;transition:opacity .6s}
+.oracle.show{opacity:1;pointer-events:auto}
+.o-card{max-width:480px;margin:0 auto;background:rgba(13,19,48,.92);border:1px solid var(--line);border-radius:20px;padding:28px 22px;display:flex;flex-direction:column;gap:18px}
+.o-from{margin:0;text-align:center;color:var(--dim);font-size:13px;letter-spacing:.1em}
+.o-head{display:flex;align-items:baseline;justify-content:center;gap:12px;flex-wrap:wrap}
+.o-no{font-family:var(--serif);font-size:30px;font-weight:700;letter-spacing:.16em}
+.o-gz{color:var(--dim);font-size:14px;letter-spacing:.2em}
+.o-lv{font-size:13px;letter-spacing:.2em;padding:4px 12px;border-radius:999px;border:1px solid currentColor}
+.o-lv.S,.o-lv.A{color:var(--gold)}.o-lv.B,.o-lv.C{color:#b9c3ec}.o-lv.D{color:#e9a08f}
+.o-poem{display:flex;flex-direction:column;gap:6px;text-align:center;font-family:var(--serif);font-size:clamp(18px,5vw,22px);letter-spacing:.18em;line-height:1.6;
+  padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.o-sy{margin:0;text-align:center;color:var(--dim);font-size:14px;letter-spacing:.1em}
+.o-sy b{color:var(--gold);font-weight:500}
+.o-sec h4{margin:0 0 8px;font-size:12px;letter-spacing:.24em;color:var(--dim);font-weight:500}
+.o-q{margin:0;font-family:var(--serif);font-size:16px;line-height:1.7;word-break:break-word}
+.o-cat{margin:6px 0 0;font-size:12px;color:var(--dim)}
+.o-ans p{margin:0 0 10px;font-size:15px;line-height:1.85}
+.o-ans p:last-child{margin-bottom:0}
+.o-tags{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px;background:rgba(241,198,107,.06);border-radius:12px;padding:14px 16px}
+.o-tags dt{color:var(--dim);letter-spacing:.14em}.o-tags dd{margin:0}
+.o-note{margin:0;font-size:12px;color:var(--dim);line-height:1.7;text-align:center}
+.o-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.o-ai{display:flex;flex-direction:column;gap:12px;border:1px solid rgba(241,198,107,.35);border-radius:14px;padding:16px;background:rgba(241,198,107,.05)}
+.o-ai h4{margin:0;font-size:12px;letter-spacing:.24em;color:var(--gold);font-weight:500}
+.o-ai-desc{margin:0;font-size:13px;color:var(--dim);line-height:1.7}
+.o-ai-out{margin:0;font-size:15px;line-height:1.9;white-space:pre-wrap;word-break:break-word}
+.o-ai-out.wait{color:var(--dim)}
+.o-ai-btns{display:flex;gap:8px;flex-wrap:wrap}
+.o-ai-btns button,.o-ai-btns a{border-radius:999px;padding:9px 18px;font:500 14px var(--sans);letter-spacing:.1em;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.ai-go{background:var(--gold);color:#1a1405;border:none;font-weight:700!important}
+.ai-go:disabled{opacity:.45;cursor:not-allowed}
+.ai-sub{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.o-ai-msg{margin:0;font-size:12px;color:var(--dim);line-height:1.6}
+@media (prefers-reduced-motion:reduce){.oracle{transition:none}}
 @media (prefers-reduced-motion:reduce){.panel,.result,header{transition:none}}
 </style>
 
@@ -118,8 +163,19 @@ body{margin:0;font-size:14px;overscroll-behavior:none}
   </header>
 
   <form class="panel" id="panel" autocomplete="off">
-    <label class="cap" for="wish">我的願望</label>
+    <div class="kind" role="tablist" aria-label="模式">
+      <button type="button" role="tab" id="k-wish" aria-selected="true">許願</button>
+      <button type="button" role="tab" id="k-oracle" aria-selected="false">問籤</button>
+    </div>
+    <label class="cap" for="wish" id="cap">我的願望</label>
     <textarea id="wish" maxlength="80" placeholder="寫下你想對宇宙說的願望…"></textarea>
+    <div class="catrow" id="catrow" hidden>
+      <label for="cat">問事類別</label>
+      <select id="cat">
+        <option value="auto">自動判斷</option><option>事業</option><option>財運</option><option>感情</option>
+        <option>健康</option><option>學業</option><option>家庭</option><option>出行</option><option>其他</option>
+      </select>
+    </div>
     <div class="row">
       <div class="mode" role="radiogroup" aria-label="發送方式">
         <input type="radio" name="mode" id="m-rocket" value="rocket" checked><label for="m-rocket">🚀 火箭</label>
@@ -139,6 +195,27 @@ body{margin:0;font-size:14px;overscroll-behavior:none}
     <button class="xbtn" type="button" id="closeHist" aria-label="關閉">×</button>
   </div>
   <ul class="hlist" id="hlist"></ul>
+</section>
+
+<section class="oracle" id="oracle" aria-hidden="true" aria-live="polite">
+  <div class="o-card">
+    <p class="o-from" id="o-from"></p>
+    <div class="o-head"><span class="o-no" id="o-no"></span><span class="o-gz" id="o-gz"></span><span class="o-lv" id="o-lv"></span></div>
+    <div class="o-poem" id="o-poem"></div>
+    <p class="o-sy">聖意　<b id="o-sy"></b></p>
+    <div class="o-sec"><h4>你的問題</h4><p class="o-q" id="o-q"></p><p class="o-cat" id="o-cat"></p></div>
+    <div class="o-sec"><h4>解籤</h4><div class="o-ans" id="o-ans"></div></div>
+    <dl class="o-tags" id="o-tags"></dl>
+    <div class="o-ai" id="o-ai">
+      <h4>Claude 深度解籤</h4>
+      <p class="o-ai-desc" id="ai-desc"></p>
+      <p class="o-ai-out" id="ai-out" hidden></p>
+      <div class="o-ai-btns" id="ai-btns"></div>
+      <p class="o-ai-msg" id="ai-msg" hidden></p>
+    </div>
+    <p class="o-note" id="o-note"></p>
+    <div class="o-btns"><button class="go" type="button" id="o-again">再問一題</button><button class="again" type="button" id="o-back">回到許願</button></div>
+  </div>
 </section>
 
 <section class="result" id="result" aria-live="polite">
@@ -244,10 +321,10 @@ function makeGlyphs(text,x,y){
   });
 }
 
-function startLaunch(text,mode){
+function startLaunch(text,mode,kind){
   const target=TARGETS[Math.floor(Math.random()*TARGETS.length)];
   const tx=W*(.25+Math.random()*.5),ty=H*(.08+Math.random()*.14);
-  launch={mode,text,target,t0:performance.now(),tx,ty,done:false,
+  launch={mode,text,target,kind:kind||'wish',t0:performance.now(),tx,ty,done:false,
     rx:W/2,ry:H*.78,vx:0,vy:0};
   parts=[];rings=[];flash=null;
   glyphs=makeGlyphs(text,W/2,H*.62);
@@ -260,7 +337,7 @@ function finish(){
   flash={x:launch.tx,y:launch.ty,t0:performance.now()};
   // leave a new star where the wish landed
   stars.push({x:launch.tx,y:launch.ty,r:1.9,p:0,s:.03,warm:true});
-  setTimeout(()=>showResult(launch),reduce?0:900);
+  setTimeout(()=>launch.kind==='oracle'?startReturn(launch):showResult(launch),reduce?0:900);
 }
 
 function step(now){
@@ -335,6 +412,7 @@ function step(now){
       ctx.moveTo(flash.x,flash.y-rr*1.4);ctx.lineTo(flash.x,flash.y+rr*1.4);ctx.stroke();
     }
   }
+  drawReturn(now);
   requestAnimationFrame(step);
 }
 function drawParts(){
@@ -373,7 +451,7 @@ panel.addEventListener('submit',e=>{
   const text=ta.value.trim();if(!text)return;
   const mode=document.querySelector('input[name="mode"]:checked').value;
   panel.classList.add('away');hd.style.opacity='.25';
-  startLaunch(text,mode);
+  startLaunch(text,mode,kind);
 });
 
 function showResult(L){
@@ -392,6 +470,234 @@ function showResult(L){
   addHist(L);
   document.getElementById('again').focus({preventScroll:true});
 }
+// ---- 宇宙靈籤 ----
+// [吉凶, 傾向, 籤詩四句, 聖意]　吉凶 S上上 A上吉 B中吉 C中平 D下　傾向 進守待轉貴和
+const POEMS=[
+['S','進','紫氣東來照九天|星河萬里任揚鞭|乘風直上青雲路|一舉功名萬古傳','時來運轉，大展鴻圖'],
+['B','待','月隱雲中未見光|耐心靜候夜將央|東方一線晨曦現|自有清輝滿四方','守得雲開見月明'],
+['A','貴','孤舟夜渡遇明燈|指點迷津路自成|莫道前途無伴侶|北辰高處有知音','貴人相扶，迷途得返'],
+['C','守','風急浪高且泊舟|莫將輕舸逐潮流|待他雲散天晴後|再整帆檣下九州','暫且守成，靜待風平'],
+['B','轉','枯木逢春又發枝|山窮水盡轉機時|昨宵猶嘆無行路|今日花開見柳絲','絕處逢生，否極泰來'],
+['S','和','雙星相會鵲橋邊|千里姻緣一線牽|花好月圓人長久|家和萬事福綿綿','和合圓滿，喜事臨門'],
+['D','守','烏雲蔽日暗無光|莫向深淵強逞強|退步方知天地闊|留得青山待春陽','宜退不宜進，保全為上'],
+['A','進','流星劃破夜長空|一念精誠萬事通|認定方向勤行去|功成自有好秋風','心誠志堅，所求可成'],
+['C','待','種下嘉禾未見苗|晨昏灌溉莫心焦|光陰自有成全日|秋到田間稻滿腰','勤耕待收，急則無功'],
+['B','貴','遠方傳信喜相逢|舊識新知助一功|若肯虛心多請教|雲梯自可上蒼穹','廣結善緣，自有扶持'],
+['A','和','春風拂面百花開|好事成雙結伴來|一家和睦添吉慶|笑聲常繞小樓臺','家和事興，吉慶有餘'],
+['D','待','霜重寒林鳥不飛|枝頭葉落雁南歸|且收羽翼藏深谷|來歲春溫再展輝','時運未至，養精蓄銳'],
+['B','進','銀河渡口有船行|勇者先登見太平|莫待他人皆上岸|方知錯過好風程','機會在前，把握當下'],
+['C','轉','十字街頭路兩分|東西南北意紛紛|靜心細問初衷事|自有星光指一門','抉擇之時，回歸初心'],
+['S','貴','天降祥雲映玉堂|金星高照福無疆|逢人相助如添翼|萬里鵬程任翱翔','貴人雲集，吉無不利'],
+['B','守','守得金甌不缺時|安分持家莫遲疑|若貪遠地虛名利|反失園中滿樹枝','知足守成，福在眼前'],
+['A','轉','舊路崎嶇換新途|柳暗花明景色殊|一變之間通四海|從今步步踏康衢','變則通，換個方向更佳'],
+['C','貴','隔岸遙看燈火明|欲行須借一舟輕|旁人一語能開竅|莫將心事鎖深庭','開口求助，勿獨自承擔'],
+['D','轉','狂風驟雨打花枝|落英滿地正傷悲|須知泥裡藏新種|雨過來年更繁滋','眼前受挫，終有轉圜'],
+['B','和','明月清風共一船|知心相伴意綿綿|有話但從心底說|雲開兩地共嬋娟','坦誠溝通，和合可期'],
+['A','進','駿馬奔騰向遠山|揚蹄不怕路途艱|前方自有甘泉在|一路春風度玉關','奮力向前，必有所獲'],
+['C','守','一盞孤燈照夜長|閉門讀卷養心光|外間風雨由他去|守住初心即吉祥','閉門自修，守心為吉'],
+['B','待','春雷未響蟄猶眠|萬物蓄勢待時遷|一聲霹靂驚天動|騰躍從今可上天','蓄勢待發，時至則起'],
+['S','進','北斗高懸照我行|千山萬水一身輕|今朝得遇天時好|百事營求盡可成','天時地利，百事可成'],
+['C','和','兩鳥同林各一枝|偶因風雨起爭疑|退讓一步天地闊|同巢共暖莫分離','退讓一步，和氣生財'],
+['D','進','急水灘頭莫放船|貪功冒進恐傷舷|三思而後方移步|免得臨淵悔萬千','切忌躁進，三思而行'],
+['A','貴','玉兔東升照桂林|嫦娥有意送佳音|有人默默相扶持|回首方知情義深','暗中有助，感恩惜緣'],
+['B','轉','雲開霧散見青山|曲徑通幽有路還|昨日疑難今漸解|前程漸覺步伐閒','疑難漸解，前景轉明'],
+['C','待','魚在深潭未上鉤|垂綸莫急且悠悠|心平氣定時機到|自有金鱗躍水頭','心平待時，急則失之'],
+['B','進','春江水暖鴨先知|萬象更新正此時|把握良辰勤播種|秋來碩果壓枝垂','順時而動，勤耕有成'],
+['S','轉','鯉躍龍門化作龍|風雲際會勢無窮|一朝轉運乾坤換|從此聲名四海通','大轉機至，一躍而上'],
+['C','進','半山亭上望山巔|路遠還須力向前|莫因小倦停雙腳|登頂方知別有天','已過半途，堅持即成'],
+['A','守','良田千畝穩如山|春種秋收自有還|不羨他人金滿屋|平安是福樂心間','穩中求進，平安是福'],
+['D','貴','孤雁離群夜叫霜|四顧無人倍感涼|且向舊知傳一信|溫情尚在故人鄉','勿孤立無援，宜尋舊識'],
+['B','和','桃李春風共一樓|親朋相聚話悠悠|人間至樂無他處|同心協力共白頭','同心協力，美滿可期'],
+['C','轉','山雨欲來風滿樓|未知晴雨使人愁|不如備傘從容去|變幻之中自有由','未雨綢繆，以變應變'],
+['A','進','金烏初升照海門|光芒萬丈破昏昏|從今立志行千里|莫負韶光與壯魂','立志趁早，前途光明'],
+['B','貴','深山古寺聽鐘聲|一語禪機醒夢人|若遇長者多請益|迷霧散盡見真身','請益長者，豁然開朗'],
+['D','和','破鏡難圓莫強求|覆水重收亦堪憂|放下方能新月起|明朝另有好春秋','勿強求，放下得自在'],
+['C','守','池中蓮葉正田田|莫羨江湖浪拍天|守著一方清淨水|花開自在不爭先','安守本分，不爭自得'],
+['S','和','百鳥朝鳳喜盈門|佳期已到福星臨|良緣美眷皆如意|五福同堂慶滿庭','喜事連連，五福臨門'],
+['B','待','梅花傲雪待春回|寒盡方知香自來|莫怨冬長風雪苦|枝頭已見一花開','苦盡甘來，再忍片刻'],
+['A','轉','江流九曲終歸海|路轉峰迴見大千|舊夢雖殘新夢起|一番天地一番緣','失之東隅，收之桑榆'],
+['C','貴','手持寶鏡照迷途|影裡分明識有無|良朋益友真言在|忠言逆耳是明珠','宜聽忠言，明辨是非'],
+['D','待','月缺之時莫遠行|星沉夜暗路難明|暫歸故里安心住|待到月圓再啟程','暫緩行動，月圓再議'],
+['B','進','彗星拖尾照天涯|敢為人先第一家|創新路上無先例|膽識兼備自生花','勇於開創，膽識致勝'],
+['A','和','琴瑟和鳴奏好音|一心一德到如今|花前月下同心語|歲歲年年情更深','情投意合，長長久久'],
+['C','待','船到江心忽轉風|收帆暫泊亂流中|待他風向回南日|一帆直送到江東','暫停觀望，風轉再行'],
+['B','守','春蠶吐絲日日勤|積少成多自成群|莫嫌進步如蝸慢|一步一印見功勳','積累為要，穩紮穩打'],
+['S','貴','天官賜福降祥光|紫微星動照華堂|所求所願皆如意|自有神明暗護航','福星高照，所願皆遂'],
+['C','轉','秋風掃葉滿空庭|莫為繁華一夕傾|歸根化作明春土|換得新枝萬點青','舊去新來，坦然面對'],
+['A','進','青雲有路志為梯|一步登高萬眾齊|勤勉不輟終得果|金榜題名笑展眉','勤勉向上，金榜可期'],
+['D','守','夜半行舟過險灘|礁石暗藏浪千般|不如停棹待天曉|看清水路再揚帆','險阻在前，宜停待明'],
+['B','貴','橋頭偶遇舊時人|一席長談意轉新|良機原在閒談裡|莫把緣分當浮塵','舊緣再續，機會藏於人脈'],
+['C','和','進退得宜心自安|雙方各讓一分寬|中庸之道終無礙|圓融處事萬般歡','中庸圓融，各退一步'],
+['A','待','蚌中藏玉待潮回|十載含光一旦開|莫道今朝人不識|明珠終有出塵來','懷才待時，終將發光'],
+['B','轉','冰河解凍水長流|萬里征帆又起頭|過往冰霜都化去|春光明媚滿汀洲','冰釋前嫌，重新出發'],
+['S','進','九天銀漢任遨遊|願力所及無不周|宇宙回應君心意|千祥雲集喜臨頭','心想事成，宇宙相應'],
+['C','守','家有餘糧心不慌|未雨綢繆是良方|今日節省明日用|細水長流福自長','量入為出，細水長流'],
+['A','和','萬點星辰共一天|周而復始又新年|珍惜眼前人與事|圓圓滿滿福無邊','周而復始，圓滿收成'],
+];
+const LV_NAME={S:'上上籤',A:'上吉籤',B:'中吉籤',C:'中平籤',D:'下籤'};
+const LV_TEXT={
+  S:'此籤為上上籤，時運正旺，所問之事大有可為。',
+  A:'此籤屬上吉，方向正確，順勢而行就會有好結果。',
+  B:'此籤為中吉，事情可成，但需要耐心經營、按部就班。',
+  C:'此籤為中平，吉凶參半，結果取決於你接下來的選擇。',
+  D:'此籤為下籤，代表目前時機未到，不是壞事，而是提醒你先停一停、看清楚再走。'};
+const ADVICE={
+ 進:{事業:'工作上宜主動爭取，提案、面試、爭取升遷都適合在近期出手。',財運:'財運可積極布局，但仍要分散配置、設好停損，順勢而為。',感情:'感情宜主動表達心意，對方可能正在等你先開口。',健康:'身體可以積極調養，從今天開始培養運動習慣，效果會很明顯。',學業:'學業正是衝刺時機，訂好進度全力以赴，成績可望突破。',家庭:'家中事務由你主動擔起、提出計畫，家人會支持你。',出行:'出行、搬遷可以安排，宜早做規劃、早點出發。',其他:'所問之事可主動推進，越早行動越有利。'},
+ 守:{事業:'工作宜穩守本位，先把手上的事做好，暫不宜貿然轉換跑道。',財運:'財務宜保守，守住本金比追求高報酬重要，避免借貸與高風險操作。',感情:'感情宜珍惜現有的關係，用心經營，不宜三心二意。',健康:'健康宜保守調養，規律作息、定期檢查，不熬夜、不逞強。',學業:'學業宜鞏固基礎，把已學的反覆練熟，勝過貪多求快。',家庭:'家庭以和為貴，守好家中秩序，近期少做重大變動。',出行:'出行宜謹慎，非必要可延後，若成行務必做好安全準備。',其他:'所問之事宜維持現狀，靜觀其變，守成為上。'},
+ 待:{事業:'工作上的機會還在醞釀，先充實能力，時機到了自然有人提拔。',財運:'財運尚未到位，宜觀望等待，等到明確訊號再進場。',感情:'感情需要時間沉澱，不必急著要答案，緣分到了自然水到渠成。',健康:'健康恢復需要時間，按部就班配合治療與休養，切勿心急。',學業:'學業成果會稍晚顯現，持續努力，下一次會比這一次更好。',家庭:'家中的事急不得，給彼此一些時間，事情會慢慢明朗。',出行:'出行宜改期，等時機與條件更成熟時再出發較順。',其他:'所問之事時機未熟，再等一段時間會有更好的發展。'},
+ 轉:{事業:'工作上即將出現轉變，換部門、換方向或新的機會，都可能是好事。',財運:'財運將有轉折，適合重新檢視並調整原本的投資與理財方式。',感情:'感情將出現變化，舊的心結有機會解開，或有新的緣分出現。',健康:'健康有好轉跡象，換個方法或尋求第二意見，可能會更有效。',學業:'學業宜調整讀書方法或方向，換個策略就會有突破。',家庭:'家中氣氛將有轉變，過去的僵局有機會化解。',出行:'出行或搬遷會帶來新氣象，這次的變動對你有利。',其他:'所問之事將有轉機，不必固守舊路，換個角度就有解方。'},
+ 貴:{事業:'工作上會有貴人提攜，多向前輩請益，人脈會帶來機會。',財運:'財運靠人脈與資訊而來，多聽專業意見，但最後仍要自己判斷。',感情:'感情可透過朋友介紹或共同圈子結緣，身邊的人會幫你一把。',健康:'健康上宜找到好的醫師或專業人士協助，會有明顯幫助。',學業:'學業上會遇到好老師或讀書夥伴，多發問、多交流。',家庭:'家中事可請長輩或親友協調，有人出面事情就好辦。',出行:'出行途中容易遇到貴人，結伴同行更順利。',其他:'所問之事宜借重他人之力，開口求助，自有人相助。'},
+ 和:{事業:'工作上重在團隊合作，與同事和氣相處、互相成就，事情自然順利。',財運:'財運宜合作共贏，與家人或夥伴共同規劃，和氣生財。',感情:'感情和順，雙方坦誠溝通，有望更進一步，甚至論及婚嫁。',健康:'健康重在身心平衡，心情放鬆、飲食均衡，自然安康。',學業:'學業宜與同學互助合作，一起讀書效果加倍。',家庭:'家庭和樂，適合團聚、慶祝，一家人同心最有福。',出行:'出行愉快，與家人朋友同行最佳，旅途平安和樂。',其他:'所問之事以和為貴，各退一步，就能圓滿收場。'}};
+const YIJI={進:['主動出擊、把握時機','猶豫不決'],守:['穩健保守、量力而為','貪多冒進'],待:['耐心準備、充實自己','急躁求成'],轉:['調整方向、接受改變','固執舊路'],貴:['請益求助、廣結善緣','獨斷獨行'],和:['溝通協調、以和為貴','爭強鬥氣']};
+const TIMING={進:'近期即可行動，宜早不宜遲',守:'未來三個月以守為主',待:'等下一次月圓或季節更替之後',轉:'變化約在一、兩個月內出現',貴:'留意近期遇到的人與邀約',和:'宜選家人團聚或節慶之時'};
+const CAT_KEYS=[
+ ['健康','健康 身體 生病 病 手術 開刀 醫生 醫院 治療 睡眠 失眠 疼 痛 懷孕 減肥 康復 體檢'],
+ ['學業','考試 考上 學業 讀書 成績 升學 研究所 證照 國考 論文 錄取 留學 學校 畢業'],
+ ['感情','感情 愛情 戀 男友 女友 男朋友 女朋友 喜歡 對象 結婚 婚 復合 分手 告白 曖昧 桃花 另一半 老公 老婆 伴侶 交往'],
+ ['財運','財 錢 投資 股票 股市 基金 賺 收入 獎金 樂透 彩券 買房 房子 貸款 債 理財 期貨 虛擬幣 比特幣 存款'],
+ ['事業','工作 事業 升遷 加薪 老闆 主管 公司 面試 轉職 換工作 創業 職位 業績 客戶 生意 開店 同事 上班'],
+ ['出行','出國 旅行 旅遊 搬家 出差 遷居 移民 開車 遠行 機票'],
+ ['家庭','家 父親 母親 爸 媽 孩子 小孩 兒子 女兒 子女 家人 長輩 兄弟 姊妹 親人 公婆 岳']];
+function detectCat(q){
+  let best='其他',score=0;
+  for(const [c,keys] of CAT_KEYS){const s=keys.split(' ').reduce((n,k)=>n+(q.includes(k)?k.length:0),0);if(s>score){score=s;best=c}}
+  return best;
+}
+const cnNum=n=>{const d='零一二三四五六七八九';if(n<10)return d[n];const t=Math.floor(n/10),u=n%10;return (t>1?d[t]:'')+'十'+(u?d[u]:'')};
+const ganzhi=n=>'甲乙丙丁戊己庚辛壬癸'[(n-1)%10]+'子丑寅卯辰巳午未申酉戌亥'[(n-1)%12];
+
+let kind='wish',ret=null;
+const cap=document.getElementById('cap'),catrow=document.getElementById('catrow'),catSel=document.getElementById('cat'),
+  subEl=document.querySelector('.sub'),histBtn=document.getElementById('openHist'),oracle=document.getElementById('oracle');
+function setKind(k){
+  kind=k;
+  document.getElementById('k-wish').setAttribute('aria-selected',k==='wish');
+  document.getElementById('k-oracle').setAttribute('aria-selected',k==='oracle');
+  cap.textContent=k==='wish'?'我的願望':'我想問宇宙的問題';
+  ta.placeholder=k==='wish'?'寫下你想對宇宙說的願望…':'寫下想對宇宙問的問題…';
+  go.textContent=k==='wish'?'發射':'求籤';
+  subEl.textContent=k==='wish'?'寫下願望，把它送進星空':'寫下疑問，讓宇宙回你一首籤詩';
+  catrow.hidden=k!=='oracle';histBtn.hidden=k==='oracle';cnt.hidden=k==='oracle';
+}
+document.getElementById('k-wish').addEventListener('click',()=>setKind('wish'));
+document.getElementById('k-oracle').addEventListener('click',()=>setKind('oracle'));
+
+function startReturn(L){
+  const num=1+Math.floor(Math.random()*POEMS.length);
+  ret={L,num,shown:true};
+  setTimeout(()=>showOracle(ret),reduce?0:500);
+}
+function drawReturn(now){
+  if(!ret||ret.shown)return;
+  const k=Math.min(1,(now-ret.t0)/1600),e=1-Math.pow(1-k,3);
+  const x=ret.fx+(W/2-ret.fx)*e,y=ret.fy+(H*.4-ret.fy)*e,R=10+e*48;
+  if(k<1&&!reduce)for(let i=0;i<2;i++)parts.push({x:x+(Math.random()-.5)*R*.6,y:y+(Math.random()-.5)*R*.6,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,life:.9,r:Math.random()*2.5+1});
+  const g=ctx.createRadialGradient(x,y,0,x,y,R*2.2);
+  g.addColorStop(0,'rgba(255,236,190,.55)');g.addColorStop(1,'rgba(241,198,107,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,R*2.2,0,6.283);ctx.fill();
+  const b=ctx.createRadialGradient(x-R*.3,y-R*.3,R*.1,x,y,R);
+  b.addColorStop(0,'#fff3d2');b.addColorStop(1,'#e2a948');
+  ctx.fillStyle=b;ctx.beginPath();ctx.arc(x,y,R,0,6.283);ctx.fill();
+  if(k<1){if(now-ret.swap>70){ret.disp=1+Math.floor(Math.random()*POEMS.length);ret.swap=now}}else ret.disp=ret.num;
+  ctx.fillStyle='#2a1a04';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font=`700 ${Math.max(10,R*.95)}px "Noto Sans TC",system-ui,sans-serif`;
+  ctx.fillText(ret.disp,x,y+R*.04);
+  if(k>=1&&!ret.shown){ret.shown=true;setTimeout(()=>showOracle(ret),reduce?0:700)}
+}
+function showOracle(R){
+  const n=R.num,[lv,tend,poem,sy]=POEMS[n-1],q=R.L.text;
+  const manual=catSel.value!=='auto',cat=manual?catSel.value:detectCat(q);
+  document.getElementById('o-from').textContent=`${R.L.target.name}回應了你的問題`;
+  document.getElementById('o-no').textContent=`第${cnNum(n)}籤`;
+  document.getElementById('o-gz').textContent=ganzhi(n);
+  const lvEl=document.getElementById('o-lv');lvEl.textContent=LV_NAME[lv];lvEl.className='o-lv '+lv;
+  const pEl=document.getElementById('o-poem');pEl.replaceChildren(...poem.split('|').map((s,i)=>{const d=document.createElement('div');d.textContent=s+(i%2?'。':'，');return d}));
+  document.getElementById('o-sy').textContent=sy;
+  document.getElementById('o-q').textContent='「'+q+'」';
+  document.getElementById('o-cat').textContent=`問事類別：${cat}${manual?'':'（依問題自動判斷）'}`;
+  const ans=document.getElementById('o-ans');ans.replaceChildren();
+  const lines=poem.split('|');
+  [`${LV_TEXT[lv]}籤詩說「${lines[2]}，${lines[3]}」，聖意為「${sy}」。`,
+   `就你問的${cat==='其他'?'這件事':cat+'方面'}來看：${ADVICE[tend][cat]}`,
+   `整體而言，這支籤的關鍵字是「${tend}」，${TIMING[tend]}。`].forEach(t=>{const p=document.createElement('p');p.textContent=t;ans.append(p)});
+  const tags=document.getElementById('o-tags');tags.replaceChildren();
+  [['宜',YIJI[tend][0]],['忌',YIJI[tend][1]],['時機',TIMING[tend]]].forEach(([a,b])=>{const dt=document.createElement('dt');dt.textContent=a;const dd=document.createElement('dd');dd.textContent=b;tags.append(dt,dd)});
+  const extra=cat==='健康'?'身體狀況請以醫師診斷為準。':cat==='財運'?'投資理財請自行審慎評估風險。':'';
+  document.getElementById('o-note').textContent=`籤詩僅供參考與自我提醒，${extra}最終決定仍在你自己手上。`;
+  setupAI({q,cat,n,lv,poem,sy,tend});
+  oracle.scrollTop=0;oracle.classList.add('show');oracle.setAttribute('aria-hidden','false');
+  document.getElementById('o-again').focus({preventScroll:true});
+}
+// ---- Claude 深度解籤（用使用者自己的 Claude 帳號）----
+const samplePromise=(window.claude&&typeof window.claude.use==='function')?window.claude.use('sample').catch(()=>null):Promise.resolve(null);
+let aiCtl=null;
+function buildPrompt(o){
+  const lines=o.poem.split('|');
+  return `你是一位熟悉台灣廟宇籤詩文化、說話溫暖而務實的解籤師。請根據下面這支籤，回答求籤者的問題。
+
+求籤者的問題：${o.q}
+問事類別：${o.cat}
+抽到的籤：宇宙靈籤 第${cnNum(o.n)}籤（${ganzhi(o.n)}），${LV_NAME[o.lv]}
+籤詩：${lines[0]}，${lines[1]}。${lines[2]}，${lines[3]}。
+聖意：${o.sy}
+籤的傾向：${o.tend}（進＝進取、守＝守成、待＝待時、轉＝轉機、貴＝貴人、和＝和合）
+
+請用繁體中文（台灣用語）回答，總長約 350 到 500 字，不要使用 Markdown 符號（不要 #、*、-），用以下四段，每段以【】標題開頭：
+【籤詩白話】逐句用白話解釋籤詩的意象。
+【對你問題的解讀】把籤意具體連結到求籤者的問題與處境，說明吉凶與原因。
+【具體建議】三點可以實際去做的建議，以「一、」「二、」「三、」編號。
+【提醒】一兩句溫和的提醒。若問題涉及健康、法律或投資，提醒以專業意見為準。`;
+}
+function aiBtn(label,cls,fn){const b=document.createElement('button');b.type='button';b.className=cls;b.textContent=label;b.onclick=fn;return b}
+async function setupAI(o){
+  aiCtl?.abort();aiCtl=null;
+  const desc=document.getElementById('ai-desc'),out=document.getElementById('ai-out'),btns=document.getElementById('ai-btns'),msg=document.getElementById('ai-msg');
+  out.hidden=true;out.textContent='';msg.hidden=true;btns.replaceChildren();desc.textContent='正在確認是否能使用 Claude…';
+  const prompt=buildPrompt(o);
+  const sample=await samplePromise;
+  if(!sample){fallback();return}
+  desc.textContent='讓 Claude 針對你的問題逐句解讀這支籤。會使用你自己的 Claude 帳號額度，第一次使用時會詢問是否允許。';
+  const go=aiBtn('請 Claude 解籤','ai-go',run);btns.append(go);
+  async function run(){
+    aiCtl=new AbortController();const ctl=aiCtl;
+    go.disabled=true;go.textContent='解籤中…';
+    const stop=aiBtn('停止','ai-sub',()=>ctl.abort());btns.append(stop);
+    out.hidden=false;out.className='o-ai-out wait';out.textContent='Claude 正在思考這支籤，大約需要十幾秒到一分鐘…';msg.hidden=true;
+    try{
+      const {truncated}=await sample(prompt,{signal:ctl.signal,onText:({text})=>{out.className='o-ai-out';out.textContent=text}});
+      if(truncated){msg.hidden=false;msg.textContent='回答太長被截斷了，可以再按一次重新解籤。'}
+      go.textContent='重新解籤';
+    }catch(e){
+      out.className='o-ai-out';out.textContent=e.text||'';if(!e.text)out.hidden=true;
+      if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(e.code)){stop.remove();btns.replaceChildren();fallback('這次沒有取得 Claude 的使用許可，改用下面的方式：');return}
+      msg.hidden=false;
+      msg.textContent=e.code==='cancelled'?'已停止。':e.code==='rate_limited'?'Claude 的使用次數暫時達到上限，請稍後再試。':e.code==='session_expired'?'Claude 登入已過期，請重新登入後再試。':e.code==='refused'?'Claude 無法回答這個問題，換個問法試試看。':'連線中斷了，請再按一次。';
+      go.textContent='再試一次';
+    }finally{go.disabled=false;stop.remove()}
+  }
+  function fallback(lead){
+    desc.textContent=(lead||'')+'這個網頁版沒有直接連到 Claude。按下面的按鈕，會把籤詩和你的問題整理好，到 Claude 用你自己的帳號解籤。';
+    const link=document.createElement('a');link.className='ai-go';link.target='_blank';link.rel='noopener';
+    link.href='https://claude.ai/new?q='+encodeURIComponent(prompt);link.textContent='到 Claude 解籤';
+    const copy=aiBtn('複製解籤提示','ai-sub',async()=>{
+      try{await navigator.clipboard.writeText(prompt);copy.textContent='已複製 ✓'}
+      catch(e){out.hidden=false;out.className='o-ai-out';out.textContent=prompt;const r=document.createRange();r.selectNodeContents(out);const s=getSelection();s.removeAllRanges();s.addRange(r);copy.textContent='已選取，請手動複製'}
+      setTimeout(()=>copy.textContent='複製解籤提示',2500);
+    });
+    btns.replaceChildren(link,copy);
+    msg.hidden=false;msg.textContent='如果 Claude 開啟後沒有自動帶入內容，請按「複製解籤提示」，再貼到 Claude 的輸入框送出。';
+  }
+}
+function closeOracle(toKind){
+  aiCtl?.abort();
+  oracle.classList.remove('show');oracle.setAttribute('aria-hidden','true');
+  panel.classList.remove('away');hd.style.opacity='';
+  launch=null;ret=null;glyphs=[];rings=[];
+  ta.value='';go.disabled=true;setKind(toKind);ta.focus({preventScroll:true});
+}
+document.getElementById('o-again').addEventListener('click',()=>closeOracle('oracle'));
+document.getElementById('o-back').addEventListener('click',()=>closeOracle('wish'));
+
 // ---- 歷史願望 ----
 const HKEY='wish-history';
 let hist=[];
